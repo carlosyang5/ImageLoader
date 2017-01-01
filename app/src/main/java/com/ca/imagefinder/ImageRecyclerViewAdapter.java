@@ -4,6 +4,10 @@ import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
+import com.ca.imagefinder.imginterface.IImageData;
+import com.ca.imagefinder.pixabay.PixabayImage;
+import com.ca.imagefinder.pixabay.PixabayResponse;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +16,7 @@ import java.util.List;
  */
 public class ImageRecyclerViewAdapter extends RecyclerView.Adapter<ImageHolder> {
 
-    private final List<PixabayImage> mImageList = new ArrayList<>();
+    private final List<IImageData> mImageList = new ArrayList<>();
     private final Activity mActivity;
     public ImageRecyclerViewAdapter(Activity activity) {
         mActivity = activity;
@@ -35,11 +39,12 @@ public class ImageRecyclerViewAdapter extends RecyclerView.Adapter<ImageHolder> 
         return mImageList.size();
     }
 
-    public void setImageResultList(PixabayResponse result) {
+    public void setImageResultList(List<IImageData> imgData) {
         mImageList.clear();
-        if (result != null) {
-            mImageList.addAll(result.getHits());
-            notifyDataSetChanged();
+        if (imgData != null) {
+            mImageList.addAll(imgData);
         }
+
+        notifyDataSetChanged();
     }
 }

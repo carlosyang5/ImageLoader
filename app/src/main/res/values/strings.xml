@@ -4,4 +4,5 @@
     <string name="hint_input">Input keyword and search</string>
     <string name="hint_no_result">No search result</string>
     <string name="hint_error">Error</string>
+    <string name="hint_cancel">Searching be canceled</string>
 </resources>

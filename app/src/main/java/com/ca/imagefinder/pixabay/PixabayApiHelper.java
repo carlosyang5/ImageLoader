@@ -1,13 +1,13 @@
-package com.ca.imagefinder;
+package com.ca.imagefinder.pixabay;
 
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import com.ca.imagefinder.Logger;
+
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;

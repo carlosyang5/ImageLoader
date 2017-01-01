@@ -1,7 +1,6 @@
 package com.ca.imagefinder;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -17,6 +16,8 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.stream.HttpUrlGlideUrlLoader;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.ViewTarget;
+import com.ca.imagefinder.imginterface.IImageData;
+import com.ca.imagefinder.pixabay.PixabayImage;
 
 import java.io.File;
 import java.io.InputStream;
@@ -39,20 +40,20 @@ public class ImageHolder extends RecyclerView.ViewHolder{
         progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
     }
 
-    public void bindView(final Activity activity, PixabayImage image) {
+    public void bindView(final Activity activity, IImageData image) {
         if (image == null) {
             //Check data if need
             return;
         }
         if (Logger.ENABLE_LOG) {
-            Logger.d("bindView: " + image.getWebformatURL());
+            Logger.d("bindView: " + image.getUrl());
         }
         Glide.clear(cardImageView);
         cardImageView.setClickable(false);
         progressBar.setVisibility(View.VISIBLE);
         Glide.with(cardImageView.getContext())
                 .using(new HttpUrlGlideUrlLoader(), InputStream.class)
-                .load(new GlideUrl(image.getWebformatURL()))
+                .load(new GlideUrl(image.getUrl()))
                 .as(File.class)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .into(new ViewTarget<ImageView, File>(cardImageView) {

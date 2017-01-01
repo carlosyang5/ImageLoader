@@ -1,10 +1,8 @@
 package com.ca.imagefinder;
 
 import android.content.Context;
-import android.support.v4.widget.SearchViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.Editable;
@@ -19,8 +17,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
+import com.ca.imagefinder.imginterface.IImageData;
+import com.ca.imagefinder.imginterface.IImageLoader;
+import com.ca.imagefinder.pixabay.PixabayApiHelper;
+import com.ca.imagefinder.pixabay.PixabayResponse;
+import com.ca.imagefinder.pixabay.PxImageData;
+import com.ca.imagefinder.pixabay.PxImageLoader;
 
+import java.util.List;
+
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
@@ -33,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText mEditText;
     private ProgressBar mProgress;
     private TextView mHintView;
+    private IImageLoader mImgLoader;
+    private Subscription mSearchSubscription;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         mSearchBtn = findViewById(R.id.search_btn);
         mProgress = (ProgressBar) findViewById(R.id.progressBar);
         mHintView = (TextView) findViewById(R.id.hint_text);
+        mImgLoader = new PxImageLoader();//Only support Pixabay search for now
         mEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -80,17 +89,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mResultAdapter.setImageResultList(null);
+                cancelSearch();
                 updateUiForSearching();
-                PixabayApiHelper.queryPixabaySearchApi(mEditText.getText().toString())
-                        .subscribeOn(Schedulers.io())
+                mSearchSubscription = mImgLoader.createQueryImageObservable(mEditText.getText().toString())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<PixabayResponse>() {
+                        .subscribe(new Action1<List<IImageData>>() {
                             @Override
-                            public void call(PixabayResponse pixabayResponse) {
-                                if (pixabayResponse != null
-                                        && pixabayResponse.getHits() != null
-                                        && pixabayResponse.getHits().size() > 0) {
-                                    mResultAdapter.setImageResultList(pixabayResponse);
+                            public void call(List<IImageData> list) {
+                                if (list != null && list.size() > 0) {
+                                    mResultAdapter.setImageResultList(list);
                                     updateUiForSearchSuccess();
                                 } else {
                                     updateUiForSearchError(R.string.hint_no_result);
@@ -110,6 +117,19 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onDestroy() {
+        cancelSearch();
+        super.onDestroy();
+    }
+
+    private void cancelSearch() {
+        if (mSearchSubscription != null) {
+            mSearchSubscription.unsubscribe();
+            mSearchSubscription = null;
+            updateUiForSearchError(R.string.hint_cancel);
+        }
+    }
 
     private void updateUiForSearching() {
         mEditText.setEnabled(false);

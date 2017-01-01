@@ -1,4 +1,4 @@
-package com.ca.imagefinder;
+package com.ca.imagefinder.pixabay;
 
 import java.util.Map;
 

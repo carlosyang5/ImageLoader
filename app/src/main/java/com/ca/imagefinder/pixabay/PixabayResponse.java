@@ -1,4 +1,4 @@
-package com.ca.imagefinder;
+package com.ca.imagefinder.pixabay;
 import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
