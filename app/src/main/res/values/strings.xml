@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ImageFinder</string>
+
+    <string name="hint_input">Input keyword and search</string>
+    <string name="hint_no_result">No search result</string>
+    <string name="hint_error">Error</string>
+</resources>
