@@ -1,12 +1,9 @@
 package com.ca.imagefinder;
 
-import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import com.ca.imagefinder.imginterface.IImageData;
-import com.ca.imagefinder.pixabay.PixabayImage;
-import com.ca.imagefinder.pixabay.PixabayResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +14,11 @@ import java.util.List;
 public class ImageRecyclerViewAdapter extends RecyclerView.Adapter<ImageHolder> {
 
     private final List<IImageData> mImageList = new ArrayList<>();
-    private final Activity mActivity;
-    public ImageRecyclerViewAdapter(Activity activity) {
-        mActivity = activity;
+
+    public ImageRecyclerViewAdapter() {
+
     }
+
     @Override
     public ImageHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         //Only one view type for now
@@ -30,7 +28,7 @@ public class ImageRecyclerViewAdapter extends RecyclerView.Adapter<ImageHolder> 
     @Override
     public void onBindViewHolder(ImageHolder holder, int position) {
         if (position >= 0 && position < mImageList.size()) {
-            holder.bindView(mActivity, mImageList.get(position));
+            holder.bindView(mImageList.get(position));
         }
     }
 

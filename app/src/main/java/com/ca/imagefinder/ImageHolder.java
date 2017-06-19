@@ -17,7 +17,6 @@ import com.bumptech.glide.load.model.stream.HttpUrlGlideUrlLoader;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.ViewTarget;
 import com.ca.imagefinder.imginterface.IImageData;
-import com.ca.imagefinder.pixabay.PixabayImage;
 
 import java.io.File;
 import java.io.InputStream;
@@ -25,7 +24,7 @@ import java.io.InputStream;
 /**
  * Created by carlosyang on 2016/12/31.
  */
-public class ImageHolder extends RecyclerView.ViewHolder{
+public class ImageHolder extends RecyclerView.ViewHolder {
 
     public static ImageHolder generateImageHolder(@NonNull ViewGroup parent) {
         View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_image_holder, parent, false);
@@ -34,13 +33,16 @@ public class ImageHolder extends RecyclerView.ViewHolder{
 
     public final ImageView cardImageView;
     public final ProgressBar progressBar;
+    private String mImgUrl = null;
+    private ViewTarget<ImageView, File> mInnerViewTarget;
+
     public ImageHolder(View itemView) {
         super(itemView);
         cardImageView = (ImageView) itemView.findViewById(R.id.card_image);
         progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
     }
 
-    public void bindView(final Activity activity, IImageData image) {
+    public void bindView(IImageData image) {
         if (image == null) {
             //Check data if need
             return;
@@ -48,37 +50,57 @@ public class ImageHolder extends RecyclerView.ViewHolder{
         if (Logger.ENABLE_LOG) {
             Logger.d("bindView: " + image.getUrl());
         }
-        Glide.clear(cardImageView);
+
+        String imgUrl = image.getUrl();
+
+        if (mImgUrl != null) {
+            if (mImgUrl.equals(imgUrl)) {
+                //the same target, don't need do any thing
+                return;
+            }
+        }
+
+        //clear view target if exist
+        if (mInnerViewTarget != null) {
+            Glide.clear(mInnerViewTarget);
+        }
+
+        mImgUrl = imgUrl;
+        cardImageView.setImageBitmap(null);
         cardImageView.setClickable(false);
         progressBar.setVisibility(View.VISIBLE);
+
+        mInnerViewTarget = new ViewTarget<ImageView, File>(cardImageView) {
+            @Override
+            public void onResourceReady(File resource, GlideAnimation<? super File> glideAnimation) {
+                final String filePath = resource != null && resource.exists() ? resource.getAbsolutePath() : null;
+                if (Logger.ENABLE_LOG) {
+                    Logger.d("onResourceReady: " + filePath);
+                }
+                if (filePath != null && view != null && view.getContext() instanceof Activity) {
+                    final Activity activity = (Activity) view.getContext();
+                    view.setImageBitmap(BitmapFactory.decodeFile(filePath));
+                    view.setClickable(true);
+                    view.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (!activity.isFinishing() && !activity.isDestroyed()) {
+                                ImageLightBoxActivity.launch(activity, view, filePath);
+                            }
+                        }
+                    });
+                }
+                //stop holder's progress
+                progressBar.setVisibility(View.GONE);
+            }
+        };
+
         Glide.with(cardImageView.getContext())
                 .using(new HttpUrlGlideUrlLoader(), InputStream.class)
                 .load(new GlideUrl(image.getUrl()))
                 .as(File.class)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                .into(new ViewTarget<ImageView, File>(cardImageView) {
-                    @Override
-                    public void onResourceReady(File resource, GlideAnimation<? super File> glideAnimation) {
-                        final String filePath = resource != null && resource.exists() ? resource.getAbsolutePath() : null;
-                        if (Logger.ENABLE_LOG) {
-                            Logger.d("onResourceReady: " + filePath);
-                        }
-                        if (filePath != null) {
-                            cardImageView.setImageBitmap(BitmapFactory.decodeFile(filePath));
-                            cardImageView.setClickable(true);
-                            cardImageView.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    if (!activity.isFinishing() && !activity.isDestroyed()) {
-                                        ImageLightBoxActivity.launch(activity, cardImageView, filePath);
-                                    }
-                                }
-                            });
-                        }
-                        progressBar.setVisibility(View.GONE);
-                    }
-                });
-
+                .into(mInnerViewTarget);
 
     }
 }

@@ -1,8 +1,8 @@
 package com.ca.imagefinder;
 
 import android.content.Context;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.Editable;
@@ -19,9 +19,6 @@ import android.widget.Toast;
 
 import com.ca.imagefinder.imginterface.IImageData;
 import com.ca.imagefinder.imginterface.IImageLoader;
-import com.ca.imagefinder.pixabay.PixabayApiHelper;
-import com.ca.imagefinder.pixabay.PixabayResponse;
-import com.ca.imagefinder.pixabay.PxImageData;
 import com.ca.imagefinder.pixabay.PxImageLoader;
 
 import java.util.List;
@@ -29,7 +26,6 @@ import java.util.List;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mHintView;
     private IImageLoader mImgLoader;
     private Subscription mSearchSubscription;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView = (RecyclerView) findViewById(R.id.result_items_view);
         mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
 //        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mResultAdapter = new ImageRecyclerViewAdapter(this);
+        mResultAdapter = new ImageRecyclerViewAdapter();
         mRecyclerView.setAdapter(mResultAdapter);
         mEditText = (EditText) findViewById(R.id.input_edit_text);
         mSearchBtn = findViewById(R.id.search_btn);
@@ -133,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateUiForSearching() {
         mEditText.setEnabled(false);
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
         mSearchBtn.setEnabled(false);
         mHintView.setVisibility(View.GONE);
